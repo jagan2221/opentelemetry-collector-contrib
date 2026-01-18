@@ -59,6 +59,9 @@ type Config struct {
 	// Attributes defines the attribute enrichment rules.
 	// Each rule specifies how to look up a value and where to store the result.
 	Attributes []AttributeConfig `mapstructure:"attributes"`
+
+	// Cache configures the caching behavior for lookup sources.
+	Cache lookupsource.CacheConfig `mapstructure:"cache"`
 }
 
 type SourceConfig struct {

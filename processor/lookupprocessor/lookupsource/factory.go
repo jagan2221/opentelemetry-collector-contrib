@@ -16,6 +16,7 @@ type SourceConfig interface {
 type CreateSettings struct {
 	TelemetrySettings component.TelemetrySettings
 	BuildInfo         component.BuildInfo
+	Cache             CacheConfig
 }
 
 type CreateSourceFunc func(ctx context.Context, settings CreateSettings, cfg SourceConfig) (Source, error)

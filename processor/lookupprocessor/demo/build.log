@@ -1,0 +1,7 @@
+2026-01-18T09:00:18.707Z	INFO	internal/command.go:98	OpenTelemetry Collector Builder	{"version": "v0.143.0"}
+2026-01-18T09:00:18.707Z	INFO	internal/command.go:103	Using config file	{"path": "builder-config.yaml"}
+2026-01-18T09:00:18.708Z	INFO	builder/config.go:161	Using go	{"go-executable": "/usr/local/go/bin/go"}
+2026-01-18T09:00:18.710Z	INFO	builder/main.go:106	Sources created	{"path": "/workspaces/opentelemetry-collector-contrib/dist"}
+2026-01-18T09:00:46.119Z	INFO	builder/main.go:210	Getting go modules
+2026-01-18T09:00:58.101Z	INFO	builder/main.go:117	Compiling
+2026-01-18T09:01:37.832Z	INFO	builder/main.go:149	Compiled	{"binary": "/workspaces/opentelemetry-collector-contrib/dist/otelcol-custom"}

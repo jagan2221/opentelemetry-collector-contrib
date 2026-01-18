@@ -33,8 +33,12 @@ processors:
 
 | Field | Description | Default |
 | ----- | ----------- | ------- |
-| `source.type` | The source type identifier (`noop`, `yaml`) | `noop` |
+| `source.type` | The source type identifier (`noop`, `yaml`, `dns`) | `noop` |
 | `attributes` | List of attribute enrichment rules (required) | - |
+| `cache.enabled` | Enable caching of lookup results | `false` |
+| `cache.size` | Maximum number of entries in the cache | `1000` |
+| `cache.ttl` | Time-to-live for cached successful results (0 = no expiration) | `0` |
+| `cache.negative_ttl` | Time-to-live for cached not-found results (0 = don't cache) | `0` |
 
 ### Attribute Configuration
 
@@ -102,6 +106,84 @@ svc-frontend: "Frontend Web App"
 svc-backend: "Backend API Service"
 svc-worker: "Background Worker"
 ```
+
+### dns
+
+Performs DNS lookups to resolve hostnames to IP addresses (forward lookup) or IP addresses to hostnames (reverse lookup).
+
+| Field | Description | Default |
+| ----- | ----------- | ------- |
+| `mode` | DNS resolution mode: `forward` or `reverse` | `forward` |
+| `timeout` | Maximum time to wait for DNS resolution | `5s` |
+| `resolver` | Custom DNS server (format: "host:port", e.g., "8.8.8.8:53"). If empty, uses system default | - |
+| `multiple_results` | If true, returns all results as comma-separated string; if false, returns first result only | `false` |
+
+**Forward lookup** (hostname to IP):
+
+```yaml
+processors:
+  lookup:
+    source:
+      type: dns
+      mode: forward
+      timeout: 5s
+    cache:
+      enabled: true
+      size: 1000
+      ttl: 5m
+    attributes:
+      - key: server.ip
+        from_attribute: server.hostname
+```
+
+**Reverse lookup** (IP to hostname):
+
+```yaml
+processors:
+  lookup:
+    source:
+      type: dns
+      mode: reverse
+      timeout: 5s
+      resolver: "8.8.8.8:53"
+    cache:
+      enabled: true
+      size: 1000
+      ttl: 10m
+      negative_ttl: 1m
+    attributes:
+      - key: client.hostname
+        from_attribute: client.ip
+```
+
+## Caching
+
+All sources support caching to improve performance and reduce load on external systems. Configure caching at the processor level:
+
+```yaml
+processors:
+  lookup:
+    source:
+      type: dns
+      mode: forward
+    cache:
+      enabled: true
+      size: 1000           # Max entries
+      ttl: 5m              # Cache successful lookups for 5 minutes
+      negative_ttl: 1m     # Cache failed lookups for 1 minute
+    attributes:
+      - key: ip
+        from_attribute: hostname
+```
+
+**Cache Configuration:**
+
+- `enabled`: Enable/disable caching (default: `false`)
+- `size`: Maximum number of entries (default: `1000`)
+- `ttl`: Time-to-live for successful lookups. Use `0` for no expiration (default: `0`)
+- `negative_ttl`: Time-to-live for not-found results. Use `0` to not cache failures (default: `0`)
+
+The cache uses an LRU (Least Recently Used) eviction policy when it reaches the size limit.
 
 ## Benchmarks
 
@@ -191,11 +273,21 @@ func createSource(
 ) (lookupsource.Source, error) {
     c := cfg.(*Config)
 
+    // Define the lookup function
+    lookupFunc := func(ctx context.Context, key string) (any, bool, error) {
+        // Perform lookup - return (value, found, error)
+        return "result", true, nil
+    }
+
+    // Wrap with cache if enabled
+    if settings.Cache.Enabled {
+        cache := lookupsource.NewCache(settings.Cache)
+        cache.SetLogger(settings.TelemetrySettings.Logger)
+        lookupFunc = lookupsource.WrapWithCache(cache, lookupFunc)
+    }
+
     return lookupsource.NewSource(
-        func(ctx context.Context, key string) (any, bool, error) {
-            // Perform lookup - return (value, found, error)
-            return "result", true, nil
-        },
+        lookupFunc,
         func() string { return "mysource" },
         nil, // start function (optional)
         nil, // shutdown function (optional)

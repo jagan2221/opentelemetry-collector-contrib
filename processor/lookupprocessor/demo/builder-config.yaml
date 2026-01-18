@@ -1,0 +1,21 @@
+dist:
+  name: otelcol-custom
+  description: Custom OpenTelemetry Collector with lookup processor
+  output_path: /workspaces/opentelemetry-collector-contrib/dist
+  otelcol_version: 0.142.0
+
+exporters:
+  - gomod: go.opentelemetry.io/collector/exporter/debugexporter v0.142.0
+  - gomod: go.opentelemetry.io/collector/exporter/otlpexporter v0.142.0
+
+processors:
+  - gomod: go.opentelemetry.io/collector/processor/batchprocessor v0.142.0
+  - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/processor/lookupprocessor v0.142.0
+    path: /workspaces/opentelemetry-collector-contrib/processor/lookupprocessor
+
+receivers:
+  - gomod: go.opentelemetry.io/collector/receiver/otlpreceiver v0.142.0
+
+# Replace directive to use local module
+replaces:
+  - github.com/open-telemetry/opentelemetry-collector-contrib/processor/lookupprocessor => /workspaces/opentelemetry-collector-contrib/processor/lookupprocessor
