@@ -1,0 +1,33 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+
+extensions:
+  queue_storage:
+    directory: /tmp/queue_storage_test
+    create_directory: true
+    segment_size: 67108864   # 64 MiB
+    max_open_segments: 3
+
+exporters:
+  otlp/backend:
+    endpoint: localhost:55555
+    tls:
+      insecure: true
+    sending_queue:
+      enabled: true
+      queue_size: 1000000
+      storage: queue_storage
+    retry_on_failure:
+      enabled: true
+      max_interval: 30s
+    timeout: 5s
+
+service:
+  extensions: [queue_storage]
+  pipelines:
+    traces:
+      receivers: [otlp]
+      exporters: [otlp/backend]

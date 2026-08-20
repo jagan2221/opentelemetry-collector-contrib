@@ -1,0 +1,24 @@
+dist:
+  name: otelcol-queuestorage
+  description: Collector with queue_storage for integration testing
+  output_path: ./dist-queuestorage
+  version: 0.158.0-dev
+
+receivers:
+  - gomod: go.opentelemetry.io/collector/receiver/otlpreceiver v0.158.1-0.20260805181402-19664a7b14af
+
+exporters:
+  - gomod: go.opentelemetry.io/collector/exporter/otlpexporter v0.158.1-0.20260805181402-19664a7b14af
+  - gomod: go.opentelemetry.io/collector/exporter/debugexporter v0.158.1-0.20260805181402-19664a7b14af
+
+extensions:
+  - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/extension/storage/queuestorage v0.158.0
+    path: ./extension/storage/queuestorage
+
+providers:
+  - gomod: go.opentelemetry.io/collector/confmap/provider/fileprovider v1.64.1-0.20260805181402-19664a7b14af
+  - gomod: go.opentelemetry.io/collector/confmap/provider/envprovider v1.64.1-0.20260805181402-19664a7b14af
+  - gomod: go.opentelemetry.io/collector/confmap/provider/yamlprovider v1.64.1-0.20260805181402-19664a7b14af
+
+replaces:
+  - github.com/open-telemetry/opentelemetry-collector-contrib/extension/storage/queuestorage => ./extension/storage/queuestorage

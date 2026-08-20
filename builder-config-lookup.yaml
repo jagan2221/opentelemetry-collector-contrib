@@ -1,0 +1,27 @@
+dist:
+  name: otelcol-custom
+  description: Custom OpenTelemetry Collector with lookup processor (local dev build)
+  output_path: ./dist
+  version: 0.153.0-dev
+
+exporters:
+  - gomod: go.opentelemetry.io/collector/exporter/debugexporter v0.153.1-0.20260528150546-fe2cf23ff222
+  - gomod: go.opentelemetry.io/collector/exporter/otlpexporter v0.153.1-0.20260528150546-fe2cf23ff222
+
+processors:
+  - gomod: go.opentelemetry.io/collector/processor/batchprocessor v0.153.1-0.20260528150546-fe2cf23ff222
+  - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/processor/lookupprocessor v0.0.0-00010101000000-000000000000
+    path: ./processor/lookupprocessor
+
+receivers:
+  - gomod: go.opentelemetry.io/collector/receiver/otlpreceiver v0.153.1-0.20260528150546-fe2cf23ff222
+
+providers:
+  - gomod: go.opentelemetry.io/collector/confmap/provider/envprovider v1.59.1-0.20260528150546-fe2cf23ff222
+  - gomod: go.opentelemetry.io/collector/confmap/provider/fileprovider v1.59.1-0.20260528150546-fe2cf23ff222
+  - gomod: go.opentelemetry.io/collector/confmap/provider/httpprovider v1.59.1-0.20260528150546-fe2cf23ff222
+  - gomod: go.opentelemetry.io/collector/confmap/provider/httpsprovider v1.59.1-0.20260528150546-fe2cf23ff222
+  - gomod: go.opentelemetry.io/collector/confmap/provider/yamlprovider v1.59.1-0.20260528150546-fe2cf23ff222
+
+replaces:
+  - github.com/open-telemetry/opentelemetry-collector-contrib/processor/lookupprocessor => ./processor/lookupprocessor

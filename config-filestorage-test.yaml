@@ -1,0 +1,32 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+
+extensions:
+  file_storage:
+    directory: /home/ubuntu/file_storage_test
+    create_directory: true
+    fsync: false
+
+exporters:
+  otlp/backend:
+    endpoint: localhost:55555
+    tls:
+      insecure: true
+    sending_queue:
+      enabled: true
+      queue_size: 1000000
+      storage: file_storage
+    retry_on_failure:
+      enabled: true
+      max_interval: 30s
+    timeout: 5s
+
+service:
+  extensions: [file_storage]
+  pipelines:
+    traces:
+      receivers: [otlp]
+      exporters: [otlp/backend]
